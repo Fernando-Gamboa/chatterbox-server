@@ -66,4 +66,26 @@ describe('server', function() {
   });
 
 
+  // ADDED THESE TESTS ----------------------------------------------------------------------
+  it('[LSIS] Should check to make sure every message has a username', function(done) {
+    var requestParams = { method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        text: 'Do my bidding! LiveServerIntegrationSpec.js'
+      }
+    };
+    request(requestParams, function(error, response, body) {
+      expect(response.statusCode).to.equal(404);
+      done();
+    });
+  });
+
+
+  it('should not send back a number', function(done) {
+    request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+      var parsedBody = JSON.parse(body);
+      expect(parsedBody).to.not.be.an('number');
+      done();
+    });
+  });
 });

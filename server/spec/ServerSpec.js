@@ -91,4 +91,65 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+
+
+  // WE ADDED THESE TESTS ----------------------------------------------------------------
+  it('Should 404 when trying to delete inside of /classes/messages', function() {
+    var req = new stubs.request('/classes/messages', 'DELETE');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(404);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should be able to get messages that were previously posted', function() {
+    var stubMsg = {
+      username: 'Jono',
+      text: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Jono');
+    expect(messages[0].text).to.equal('Do my bidding!');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should not send back a string', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    var parsedBody = JSON.parse(res._data);
+    expect(parsedBody).not.to.be.an('string');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('[ServerSpec.js] Should check to make sure every message has a username', function() {
+    var stubMsg = {
+      text: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(404);
+  });
 });
